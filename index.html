@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Generator — Fallow Deer</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --input: #f9fafb;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --secondary: #111827;
+      --shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+    }
+
+    body.dark {
+      --bg: #0b1220;
+      --card: #111827;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: #253045;
+      --input: #0f172a;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --secondary: #e5e7eb;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Inter, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.55rem;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--border);
+      background: var(--input);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .output-wrap {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    #password {
+      flex: 1;
+      height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0 14px;
+      font-size: 0.95rem;
+      background: var(--input);
+      color: var(--text);
+      outline: none;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .copy-btn,
+    .generate-btn {
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      padding: 0 16px;
+      background: var(--secondary);
+      color: var(--card);
+    }
+
+    body.dark .copy-btn {
+      color: #111827;
+    }
+
+    .copy-btn:hover {
+      opacity: 0.92;
+    }
+
+    .section {
+      margin-bottom: 18px;
+    }
+
+    .section label.title {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .options {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .options label,
+    .inline-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .custom-wrap {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .custom-wrap.show {
+      display: block;
+    }
+
+    #customChars {
+      width: 100%;
+      min-height: 90px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.95rem;
+      background: var(--input);
+      color: var(--text);
+      outline: none;
+    }
+
+    .generate-btn {
+      width: 100%;
+      height: 48px;
+      background: var(--primary);
+      color: white;
+      font-size: 1rem;
+    }
+
+    .generate-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .message {
+      margin-top: 14px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      min-height: 20px;
+    }
+
+    .footer {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .footer a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 520px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .output-wrap {
+        flex-direction: column;
+      }
+
+      .copy-btn {
+        height: 46px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <div class="topbar">
+        <h1>Password Generator</h1>
+        <button id="themeToggle" class="theme-toggle" type="button">Dark</button>
+      </div>
+
+      <p class="subtitle">Generate a strong password with simple controls.</p>
+
+      <div class="output-wrap">
+        <input id="password" type="text" readonly placeholder="Your password will appear here" />
+        <button id="copyBtn" class="copy-btn" type="button">Copy</button>
+      </div>
+
+      <div class="section">
+        <label for="length" class="title">Length: <span id="lengthValue">16</span></label>
+        <input id="length" type="range" min="4" max="64" value="16" />
+      </div>
+
+      <div class="options">
+        <label><input type="checkbox" id="uppercase" checked /> Uppercase</label>
+        <label><input type="checkbox" id="lowercase" checked /> Lowercase</label>
+        <label><input type="checkbox" id="numbers" checked /> Numbers</label>
+        <label><input type="checkbox" id="symbols" checked /> Symbols</label>
+        <label><input type="checkbox" id="customMode" /> Custom characters mode</label>
+      </div>
+
+      <div id="customWrap" class="custom-wrap">
+        <textarea id="customChars" placeholder="Enter your custom characters here..."></textarea>
+      </div>
+
+      <button id="generateBtn" class="generate-btn" type="button">Generate Password</button>
+      <p id="message" class="message"></p>
+
+      <div class="footer">
+        <a href="https://fallowdeer.eu" target="_blank" rel="noopener noreferrer">
+          © Fallow Deer <span id="year"></span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const passwordEl = document.getElementById("password");
+    const copyBtn = document.getElementById("copyBtn");
+    const generateBtn = document.getElementById("generateBtn");
+    const lengthEl = document.getElementById("length");
+    const lengthValueEl = document.getElementById("lengthValue");
+    const messageEl = document.getElementById("message");
+    const themeToggle = document.getElementById("themeToggle");
+
+    const uppercaseEl = document.getElementById("uppercase");
+    const lowercaseEl = document.getElementById("lowercase");
+    const numbersEl = document.getElementById("numbers");
+    const symbolsEl = document.getElementById("symbols");
+
+    const customModeEl = document.getElementById("customMode");
+    const customWrapEl = document.getElementById("customWrap");
+    const customCharsEl = document.getElementById("customChars");
+
+    const yearEl = document.getElementById("year");
+
+    const charSets = {
+      uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      lowercase: "abcdefghijklmnopqrstuvwxyz",
+      numbers: "0123456789",
+      symbols: "!@#$%^&*()_+[]{}|;:,.<>?"
+    };
+
+    yearEl.textContent = new Date().getFullYear();
+
+    function updateLengthLabel() {
+      lengthValueEl.textContent = lengthEl.value;
+    }
+
+    function setMessage(text) {
+      messageEl.textContent = text;
+    }
+
+    function getCharacterPool() {
+      if (customModeEl.checked) {
+        const custom = customCharsEl.value;
+        const uniqueChars = [...new Set(custom.split(""))].join("");
+        return uniqueChars;
+      }
+
+      let chars = "";
+      if (uppercaseEl.checked) chars += charSets.uppercase;
+      if (lowercaseEl.checked) chars += charSets.lowercase;
+      if (numbersEl.checked) chars += charSets.numbers;
+      if (symbolsEl.checked) chars += charSets.symbols;
+      return chars;
+    }
+
+    function generatePassword() {
+      const length = Number(lengthEl.value);
+      const chars = getCharacterPool();
+
+      if (!chars.length) {
+        passwordEl.value = "";
+        setMessage(customModeEl.checked ? "" : "Select at least one character option.");
+        return;
+      }
+
+      let password = "";
+      for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * chars.length);
+        password += chars[randomIndex];
+      }
+
+      passwordEl.value = password;
+      setMessage("");
+    }
+
+    async function copyPassword() {
+      if (!passwordEl.value) {
+        setMessage("Nothing to copy yet.");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(passwordEl.value);
+        setMessage("Password copied.");
+      } catch {
+        setMessage("Copy failed.");
+      }
+    }
+
+    function applyTheme(theme) {
+      const isDark = theme === "dark";
+      document.body.classList.toggle("dark", isDark);
+      themeToggle.textContent = isDark ? "Light" : "Dark";
+      localStorage.setItem("theme", theme);
+    }
+
+    function toggleCustomMode() {
+      const isCustom = customModeEl.checked;
+      customWrapEl.classList.toggle("show", isCustom);
+
+      uppercaseEl.disabled = isCustom;
+      lowercaseEl.disabled = isCustom;
+      numbersEl.disabled = isCustom;
+      symbolsEl.disabled = isCustom;
+
+      if (!isCustom) {
+        setMessage("");
+      }
+    }
+
+    lengthEl.addEventListener("input", updateLengthLabel);
+    generateBtn.addEventListener("click", generatePassword);
+    copyBtn.addEventListener("click", copyPassword);
+
+    customModeEl.addEventListener("change", () => {
+      toggleCustomMode();
+      generatePassword();
+    });
+
+    customCharsEl.addEventListener("input", () => {
+      if (customModeEl.checked) generatePassword();
+    });
+
+    themeToggle.addEventListener("click", () => {
+      const newTheme = document.body.classList.contains("dark") ? "light" : "dark";
+      applyTheme(newTheme);
+    });
+
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      applyTheme("dark");
+    } else {
+      applyTheme("light");
+    }
+
+    updateLengthLabel();
+    toggleCustomMode();
+    generatePassword();
+  </script>
+</body>
+</html>
